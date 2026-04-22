@@ -1,268 +1,401 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="system">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HourPrice - Ton temps a de la valeur</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HourPrice</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
         :root {
-            --primary: #000000;
-            --bg-color: #f7f9fc;
+            --bg-color: #f2f2f7;
             --card-bg: #ffffff;
-            --text-main: #111827;
-            --text-muted: #6b7280;
-            --input-bg: #f3f4f6;
-            --input-border: #e5e7eb;
-            --accent: #2563eb;
-            --success-bg: #eff6ff;
-            --success-text: #1d4ed8;
+            --text-main: #000000;
+            --text-muted: #8e8e93;
+            --accent: #007aff;
+            --danger: #ff3b30;
+            --border: #e5e5ea;
+            --nav-bg: rgba(255, 255, 255, 0.9);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
+        [data-theme="dark"] {
+            --bg-color: #000000;
+            --card-bg: #1c1c1e;
+            --text-main: #ffffff;
+            --text-muted: #ebebf599;
+            --accent: #0a84ff;
+            --border: #38383a;
+            --nav-bg: rgba(28, 28, 30, 0.9);
         }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
 
-        .app-container {
-            background: var(--card-bg);
-            width: 100%;
-            max-width: 480px;
-            border-radius: 24px;
-            padding: 40px 30px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease;
-        }
+        body { background-color: var(--bg-color); color: var(--text-main); transition: background-color 0.3s; padding-bottom: 80px; }
 
-        .header {
-            text-align: center;
-            margin-bottom: 35px;
-        }
+        /* Vues de l'application */
+        .view { display: none; padding: 20px; animation: fadeIn 0.3s ease; max-width: 600px; margin: 0 auto; }
+        .view.active { display: block; }
 
-        .header h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            margin-bottom: 8px;
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .header p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }
+        h1 { font-size: 28px; font-weight: 700; margin-bottom: 20px; padding-top: 20px; }
+        h2 { font-size: 18px; font-weight: 600; margin-bottom: 15px; margin-top: 20px; }
 
-        .input-group {
-            margin-bottom: 20px;
+        /* Cartes et Formulaires */
+        .card { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+        
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 14px; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; }
+        
+        input[type="number"], input[type="text"], select {
+            width: 100%; background: var(--bg-color); border: 1px solid var(--border); color: var(--text-main);
+            font-size: 16px; padding: 15px; border-radius: 12px; outline: none; appearance: none;
         }
+        input:focus { border-color: var(--accent); }
 
-        .input-group label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: var(--text-main);
+        /* Boutons */
+        .btn {
+            width: 100%; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 600;
+            border: none; cursor: pointer; transition: transform 0.1s, opacity 0.2s;
         }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-secondary { background: var(--bg-color); color: var(--accent); margin-top: 10px; }
 
-        .input-wrapper {
-            position: relative;
+        /* Upload Image */
+        .image-upload {
+            border: 2px dashed var(--border); border-radius: 12px; padding: 20px; text-align: center;
+            color: var(--text-muted); position: relative; overflow: hidden; margin-bottom: 15px;
         }
+        .image-upload input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .preview-img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; display: none; margin-top: 10px; }
 
-        .input-wrapper span {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            font-weight: 500;
-        }
+        /* Résultat principal */
+        .result-display { text-align: center; padding: 30px 10px; }
+        .result-time { font-size: 48px; font-weight: 700; color: var(--accent); margin: 10px 0; }
+        .result-desc { color: var(--text-muted); font-size: 14px; }
 
-        input {
-            width: 100%;
-            background-color: var(--input-bg);
-            border: 1px solid var(--input-border);
-            color: var(--text-main);
-            font-size: 1rem;
-            padding: 16px 16px 16px 36px;
-            border-radius: 12px;
-            transition: all 0.2s ease;
-            outline: none;
-            -webkit-appearance: none;
-        }
+        /* Liste des objets sauvegardés */
+        .wishlist-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        .wishlist-item { background: var(--card-bg); border-radius: 16px; overflow: hidden; display: flex; align-items: center; padding: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+        .wishlist-item img { width: 70px; height: 70px; object-fit: cover; border-radius: 10px; margin-right: 15px; background: var(--bg-color); }
+        .wishlist-info { flex-grow: 1; }
+        .wishlist-info h3 { font-size: 16px; margin-bottom: 4px; }
+        .wishlist-info p { color: var(--accent); font-weight: 600; font-size: 14px; }
+        .wishlist-price { color: var(--text-muted); font-size: 12px; }
+        .delete-btn { background: none; border: none; color: var(--danger); font-size: 24px; padding: 10px; cursor: pointer; }
 
-        input:focus {
-            background-color: #fff;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        /* Navigation en bas */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%; background: var(--nav-bg);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--border);
+            display: flex; justify-content: space-around; padding: 10px 0 25px 0; z-index: 1000;
         }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; color: var(--text-muted);
+            font-size: 12px; font-weight: 500; cursor: pointer; padding: 10px; width: 33%;
+        }
+        .nav-item i { font-size: 24px; margin-bottom: 4px; }
+        .nav-item.active { color: var(--accent); }
 
-        .divider {
-            height: 1px;
-            background-color: var(--input-border);
-            margin: 30px 0;
-        }
-
-        .result-card {
-            background-color: var(--success-bg);
-            border-radius: 16px;
-            padding: 25px;
-            text-align: center;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            display: none;
-        }
-
-        .result-card.show {
-            display: block;
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .result-title {
-            color: var(--text-muted);
-            font-size: 0.875rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 8px;
-        }
-
-        .result-value {
-            color: var(--success-text);
-            font-size: 2.5rem;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-        }
-
-        .result-subtitle {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-top: 5px;
-        }
-
-        @keyframes pop {
-            0% { transform: scale(0.95); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
-        }
-
-        .animate-pop {
-            animation: pop 0.4s ease-out forwards;
-        }
+        /* Section Avancée */
+        .advanced-section { display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <div class="header">
-            <h1>HourPrice</h1>
-            <p>Convertis tes achats en temps de vie réel.</p>
-        </div>
+    <div id="view-calc" class="view active">
+        <h1>Évaluer un achat</h1>
+        
+        <div class="card">
+            <div class="input-group">
+                <label>Nom de l'objet</label>
+                <input type="text" id="itemName" placeholder="Ex: Nouvel iPhone, Baskets...">
+            </div>
+            
+            <div class="input-group">
+                <label>Prix (€)</label>
+                <input type="number" id="itemPrice" placeholder="Ex: 150" inputmode="decimal" oninput="updateLiveResult()">
+            </div>
 
-        <div class="input-group">
-            <label for="salaire">Ton salaire net mensuel</label>
-            <div class="input-wrapper">
-                <span>€</span>
-                <input type="number" id="salaire" placeholder="Ex: 2000" inputmode="decimal">
+            <div class="image-upload">
+                <i class="ph ph-camera" style="font-size: 32px;"></i>
+                <p>Ajouter une photo</p>
+                <input type="file" id="itemImage" accept="image/*">
+                <img id="imagePreview" class="preview-img">
             </div>
         </div>
 
-        <div class="input-group">
-            <label for="heures">Heures travaillées par mois</label>
-            <div class="input-wrapper">
-                <span>⏱</span>
-                <input type="number" id="heures" value="151.67" inputmode="decimal">
-            </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="input-group">
-            <label for="prix">Prix de l'objet convoité</label>
-            <div class="input-wrapper">
-                <span>€</span>
-                <input type="number" id="prix" placeholder="Ex: 150" inputmode="decimal">
-            </div>
-        </div>
-
-        <div id="result-card" class="result-card">
-            <div class="result-title">Coût réel</div>
-            <div class="result-value" id="result-time">0h</div>
-            <div class="result-subtitle">de ton temps de travail</div>
+        <div class="card result-display" id="resultContainer" style="display: none;">
+            <p class="result-desc">Cet achat représente</p>
+            <div class="result-time" id="calcResult">0h</div>
+            <p class="result-desc" id="calcSubtext">de ton temps de travail</p>
+            <button class="btn btn-primary" style="margin-top: 20px;" onclick="saveItem()">Sauvegarder l'objet</button>
         </div>
     </div>
 
+    <div id="view-list" class="view">
+        <h1>Ma Wishlist</h1>
+        <div class="wishlist-grid" id="wishlistContainer">
+            </div>
+    </div>
+
+    <div id="view-settings" class="view">
+        <h1>Mon Profil</h1>
+        
+        <div class="card">
+            <h2>Mes Revenus</h2>
+            <div class="input-group">
+                <label>Salaire net mensuel (€)</label>
+                <input type="number" id="userSalary" placeholder="Ex: 2000" inputmode="decimal" oninput="saveSettings()">
+            </div>
+            <div class="input-group">
+                <label>Heures travaillées par mois</label>
+                <input type="number" id="userHours" value="151.67" inputmode="decimal" oninput="saveSettings()">
+            </div>
+
+            <button class="btn btn-secondary" onclick="toggleAdvanced()">+ Options avancées</button>
+
+            <div class="advanced-section" id="advancedOptions">
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Pour un calcul plus strict, déduis tes charges incompressibles (Loyer, factures, courses). L'app calculera sur ton "Reste à vivre".</p>
+                <div class="input-group">
+                    <label>Charges fixes mensuelles (€)</label>
+                    <input type="number" id="userExpenses" placeholder="Ex: 800" inputmode="decimal" oninput="saveSettings()">
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Préférences</h2>
+            <div class="input-group">
+                <label>Thème de l'application</label>
+                <select id="themeSelect" onchange="changeTheme()">
+                    <option value="system">Système (Auto)</option>
+                    <option value="light">Mode Clair</option>
+                    <option value="dark">Mode Sombre</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="switchView('calc')">
+            <i class="ph-fill ph-calculator"></i>
+            <span>Calculer</span>
+        </div>
+        <div class="nav-item" onclick="switchView('list')">
+            <i class="ph-fill ph-heart"></i>
+            <span>Wishlist</span>
+        </div>
+        <div class="nav-item" onclick="switchView('settings')">
+            <i class="ph-fill ph-user"></i>
+            <span>Profil</span>
+        </div>
+    </nav>
+
     <script>
+        // Variables globales
+        let currentImageBase64 = "";
+        let savedItems = JSON.parse(localStorage.getItem('hourprice_items')) || [];
+
+        // --- INITIALISATION ---
         document.addEventListener('DOMContentLoaded', () => {
-            const salaireInput = document.getElementById('salaire');
-            const heuresInput = document.getElementById('heures');
-            const prixInput = document.getElementById('prix');
-            const resultCard = document.getElementById('result-card');
-            const resultTime = document.getElementById('result-time');
-
-            // 1. Charger les données sauvegardées (Local Storage)
-            if(localStorage.getItem('savedSalaire')) {
-                salaireInput.value = localStorage.getItem('savedSalaire');
-            }
-            if(localStorage.getItem('savedHeures')) {
-                heuresInput.value = localStorage.getItem('savedHeures');
-            }
-
-            // 2. Fonction de calcul principale
-            function calculer() {
-                const salaire = parseFloat(salaireInput.value);
-                const heures = parseFloat(heuresInput.value);
-                const prix = parseFloat(prixInput.value);
-
-                // Sauvegarder le salaire et les heures automatiquement
-                if (salaire) localStorage.setItem('savedSalaire', salaire);
-                if (heures) localStorage.setItem('savedHeures', heures);
-
-                if (salaire > 0 && heures > 0 && prix > 0) {
-                    const tauxHoraire = salaire / heures;
-                    const tempsNecessaire = prix / tauxHoraire;
-
-                    // Formater l'affichage (enlève la décimale si c'est un chiffre rond)
-                    let affichage = tempsNecessaire.toFixed(1);
-                    if (affichage.endsWith('.0')) affichage = affichage.slice(0, -2); 
-                    
-                    resultTime.textContent = affichage + 'h';
-                    
-                    // Gérer l'animation d'apparition
-                    if (!resultCard.classList.contains('show')) {
-                        resultCard.classList.add('show');
+            loadSettings();
+            applyTheme();
+            renderWishlist();
+            
+            // Gestionnaire upload image
+            document.getElementById('itemImage').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        currentImageBase64 = event.target.result;
+                        const preview = document.getElementById('imagePreview');
+                        preview.src = currentImageBase64;
+                        preview.style.display = 'block';
                     }
-                    
-                    // Relancer l'animation pop pour le dynamisme
-                    resultTime.classList.remove('animate-pop');
-                    void resultTime.offsetWidth; // Trigger reflow
-                    resultTime.classList.add('animate-pop');
-
-                } else {
-                    resultCard.classList.remove('show');
+                    reader.readAsDataURL(file);
                 }
+            });
+        });
+
+        // --- NAVIGATION ---
+        function switchView(viewName) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById('view-' + viewName).classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            if(viewName === 'list') renderWishlist();
+        }
+
+        // --- GESTION DU PROFIL ---
+        function loadSettings() {
+            document.getElementById('userSalary').value = localStorage.getItem('hp_salary') || '';
+            document.getElementById('userHours').value = localStorage.getItem('hp_hours') || '151.67';
+            document.getElementById('userExpenses').value = localStorage.getItem('hp_expenses') || '';
+            document.getElementById('themeSelect').value = localStorage.getItem('hp_theme') || 'system';
+            
+            if(localStorage.getItem('hp_expenses') > 0) {
+                document.getElementById('advancedOptions').style.display = 'block';
+            }
+        }
+
+        function saveSettings() {
+            localStorage.setItem('hp_salary', document.getElementById('userSalary').value);
+            localStorage.setItem('hp_hours', document.getElementById('userHours').value);
+            localStorage.setItem('hp_expenses', document.getElementById('userExpenses').value);
+            updateLiveResult();
+        }
+
+        function toggleAdvanced() {
+            const adv = document.getElementById('advancedOptions');
+            adv.style.display = adv.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // --- CALCUL ---
+        function getHourlyRate() {
+            const salary = parseFloat(document.getElementById('userSalary').value) || 0;
+            const hours = parseFloat(document.getElementById('userHours').value) || 151.67;
+            const expenses = parseFloat(document.getElementById('userExpenses').value) || 0;
+            
+            if (salary === 0) return 0;
+            const availableMoney = Math.max(0, salary - expenses);
+            return availableMoney / hours;
+        }
+
+        function updateLiveResult() {
+            const price = parseFloat(document.getElementById('itemPrice').value);
+            const rate = getHourlyRate();
+            const container = document.getElementById('resultContainer');
+            const resultText = document.getElementById('calcResult');
+            const subtext = document.getElementById('calcSubtext');
+
+            if (!price || rate === 0) {
+                container.style.display = 'none';
+                return;
             }
 
-            // 3. Écouter les changements en temps réel
-            salaireInput.addEventListener('input', calculer);
-            heuresInput.addEventListener('input', calculer);
-            prixInput.addEventListener('input', calculer);
+            const hoursNeeded = price / rate;
+            let displayHours = hoursNeeded.toFixed(1);
+            if (displayHours.endsWith('.0')) displayHours = displayHours.slice(0, -2);
 
-            // 4. Lancer le calcul au démarrage si les données sont déjà là
-            calculer();
+            resultText.textContent = displayHours + 'h';
+            
+            if (parseFloat(document.getElementById('userExpenses').value) > 0) {
+                subtext.textContent = "de ton temps libre (Reste à vivre)";
+            } else {
+                subtext.textContent = "de ton temps de travail";
+            }
+            
+            container.style.display = 'block';
+        }
+
+        // --- WISHLIST ---
+        function saveItem() {
+            const name = document.getElementById('itemName').value || 'Objet sans nom';
+            const price = parseFloat(document.getElementById('itemPrice').value);
+            const rate = getHourlyRate();
+            
+            if (!price || rate === 0) {
+                alert("Remplis ton profil et le prix avant de sauvegarder !");
+                return;
+            }
+
+            const hoursNeeded = (price / rate).toFixed(1);
+
+            const newItem = {
+                id: Date.now(),
+                name: name,
+                price: price,
+                hours: hoursNeeded.endsWith('.0') ? hoursNeeded.slice(0, -2) : hoursNeeded,
+                image: currentImageBase64
+            };
+
+            savedItems.unshift(newItem); // Ajoute au début
+            localStorage.setItem('hourprice_items', JSON.stringify(savedItems));
+            
+            // Reset formulaire
+            document.getElementById('itemName').value = '';
+            document.getElementById('itemPrice').value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('resultContainer').style.display = 'none';
+            currentImageBase64 = "";
+
+            // Aller à la liste
+            switchView('list');
+            document.querySelectorAll('.nav-item')[1].classList.add('active'); // Select l'icone wishlist
+            document.querySelectorAll('.nav-item')[0].classList.remove('active');
+        }
+
+        function renderWishlist() {
+            const container = document.getElementById('wishlistContainer');
+            container.innerHTML = '';
+
+            if (savedItems.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Ta liste est vide.</p>';
+                return;
+            }
+
+            savedItems.forEach(item => {
+                const imgHTML = item.image 
+                    ? `<img src="${item.image}" alt="${item.name}">` 
+                    : `<img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23e5e5ea'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='30'>🛍️</text></svg>">`;
+
+                const div = document.createElement('div');
+                div.className = 'wishlist-item';
+                div.innerHTML = `
+                    ${imgHTML}
+                    <div class="wishlist-info">
+                        <h3>${item.name}</h3>
+                        <p>Coûte ${item.hours}h de vie</p>
+                        <span class="wishlist-price">${item.price} €</span>
+                    </div>
+                    <button class="delete-btn" onclick="deleteItem(${item.id})">
+                        <i class="ph ph-trash"></i>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function deleteItem(id) {
+            savedItems = savedItems.filter(item => item.id !== id);
+            localStorage.setItem('hourprice_items', JSON.stringify(savedItems));
+            renderWishlist();
+        }
+
+        // --- THEME ---
+        function changeTheme() {
+            const theme = document.getElementById('themeSelect').value;
+            localStorage.setItem('hp_theme', theme);
+            applyTheme();
+        }
+
+        function applyTheme() {
+            const theme = localStorage.getItem('hp_theme') || 'system';
+            const html = document.documentElement;
+            
+            if (theme === 'system') {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    html.setAttribute('data-theme', 'dark');
+                } else {
+                    html.removeAttribute('data-theme');
+                }
+            } else if (theme === 'dark') {
+                html.setAttribute('data-theme', 'dark');
+            } else {
+                html.removeAttribute('data-theme');
+            }
+        }
+        
+        // Ecouteur pour le changement automatique du theme systeme
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            if(localStorage.getItem('hp_theme') === 'system') applyTheme();
         });
+
     </script>
 </body>
 </html>
