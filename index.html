@@ -2,48 +2,267 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Convertisseur Temps de Vie</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HourPrice - Ton temps a de la valeur</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; padding: 50px; background: #f4f7f6; }
-        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        .resultat { margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 10px; font-weight: bold; text-align: center; color: #2e7d32; display: none; }
+        :root {
+            --primary: #000000;
+            --bg-color: #f7f9fc;
+            --card-bg: #ffffff;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --input-bg: #f3f4f6;
+            --input-border: #e5e7eb;
+            --accent: #2563eb;
+            --success-bg: #eff6ff;
+            --success-text: #1d4ed8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app-container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 480px;
+            border-radius: 24px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper span {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--text-main);
+            font-size: 1rem;
+            padding: 16px 16px 16px 36px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input:focus {
+            background-color: #fff;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .divider {
+            height: 1px;
+            background-color: var(--input-border);
+            margin: 30px 0;
+        }
+
+        .result-card {
+            background-color: var(--success-bg);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: none;
+        }
+
+        .result-card.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .result-title {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .result-value {
+            color: var(--success-text);
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+        }
+
+        .result-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0.95); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .animate-pop {
+            animation: pop 0.4s ease-out forwards;
+        }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Vaut-il ton temps ?</h2>
-    <label>Ton salaire net mensuel (€)</label>
-    <input type="number" id="salaire" placeholder="ex: 2000" oninput="calculer()">
-    
-    <label>Heures travaillées par mois</label>
-    <input type="number" id="heures" value="151.67" oninput="calculer()">
-    
-    <label>Prix de l'objet (€)</label>
-    <input type="number" id="prix" placeholder="ex: 150" oninput="calculer()">
+    <div class="app-container">
+        <div class="header">
+            <h1>HourPrice</h1>
+            <p>Convertis tes achats en temps de vie réel.</p>
+        </div>
 
-    <div id="resultat" class="resultat"></div>
-</div>
+        <div class="input-group">
+            <label for="salaire">Ton salaire net mensuel</label>
+            <div class="input-wrapper">
+                <span>€</span>
+                <input type="number" id="salaire" placeholder="Ex: 2000" inputmode="decimal">
+            </div>
+        </div>
 
-<script>
-    function calculer() {
-        const salaire = document.getElementById('salaire').value;
-        const heures = document.getElementById('heures').value;
-        const prix = document.getElementById('prix').value;
-        const divResultat = document.getElementById('resultat');
+        <div class="input-group">
+            <label for="heures">Heures travaillées par mois</label>
+            <div class="input-wrapper">
+                <span>⏱</span>
+                <input type="number" id="heures" value="151.67" inputmode="decimal">
+            </div>
+        </div>
 
-        if (salaire > 0 && heures > 0 && prix > 0) {
-            const tauxHoraire = salaire / heures;
-            const tempsNecessaire = prix / tauxHoraire;
-            
-            divResultat.style.display = "block";
-            divResultat.innerHTML = `Cet objet te coûte <br> ${tempsNecessaire.toFixed(1)} heures de ta vie.`;
-        } else {
-            divResultat.style.display = "none";
-        }
-    }
-</script>
+        <div class="divider"></div>
 
+        <div class="input-group">
+            <label for="prix">Prix de l'objet convoité</label>
+            <div class="input-wrapper">
+                <span>€</span>
+                <input type="number" id="prix" placeholder="Ex: 150" inputmode="decimal">
+            </div>
+        </div>
+
+        <div id="result-card" class="result-card">
+            <div class="result-title">Coût réel</div>
+            <div class="result-value" id="result-time">0h</div>
+            <div class="result-subtitle">de ton temps de travail</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const salaireInput = document.getElementById('salaire');
+            const heuresInput = document.getElementById('heures');
+            const prixInput = document.getElementById('prix');
+            const resultCard = document.getElementById('result-card');
+            const resultTime = document.getElementById('result-time');
+
+            // 1. Charger les données sauvegardées (Local Storage)
+            if(localStorage.getItem('savedSalaire')) {
+                salaireInput.value = localStorage.getItem('savedSalaire');
+            }
+            if(localStorage.getItem('savedHeures')) {
+                heuresInput.value = localStorage.getItem('savedHeures');
+            }
+
+            // 2. Fonction de calcul principale
+            function calculer() {
+                const salaire = parseFloat(salaireInput.value);
+                const heures = parseFloat(heuresInput.value);
+                const prix = parseFloat(prixInput.value);
+
+                // Sauvegarder le salaire et les heures automatiquement
+                if (salaire) localStorage.setItem('savedSalaire', salaire);
+                if (heures) localStorage.setItem('savedHeures', heures);
+
+                if (salaire > 0 && heures > 0 && prix > 0) {
+                    const tauxHoraire = salaire / heures;
+                    const tempsNecessaire = prix / tauxHoraire;
+
+                    // Formater l'affichage (enlève la décimale si c'est un chiffre rond)
+                    let affichage = tempsNecessaire.toFixed(1);
+                    if (affichage.endsWith('.0')) affichage = affichage.slice(0, -2); 
+                    
+                    resultTime.textContent = affichage + 'h';
+                    
+                    // Gérer l'animation d'apparition
+                    if (!resultCard.classList.contains('show')) {
+                        resultCard.classList.add('show');
+                    }
+                    
+                    // Relancer l'animation pop pour le dynamisme
+                    resultTime.classList.remove('animate-pop');
+                    void resultTime.offsetWidth; // Trigger reflow
+                    resultTime.classList.add('animate-pop');
+
+                } else {
+                    resultCard.classList.remove('show');
+                }
+            }
+
+            // 3. Écouter les changements en temps réel
+            salaireInput.addEventListener('input', calculer);
+            heuresInput.addEventListener('input', calculer);
+            prixInput.addEventListener('input', calculer);
+
+            // 4. Lancer le calcul au démarrage si les données sont déjà là
+            calculer();
+        });
+    </script>
 </body>
 </html>
